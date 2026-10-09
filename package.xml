@@ -4,7 +4,7 @@
   <name>omni3_wheel_bot</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="my_email@email.com">MY NAME</maintainer>
+  <maintainer email="mail.arjunkulkarni@gmail.com">Arjun Kulkarni</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
