@@ -1,7 +1,129 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="robot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="omni3_robot">
 
-    <!-- Example link -->
-    <link name="base_link"></link>
+  <!-- ======================================================= -->
+  <!-- PROPERTIES                                              -->
+  <!-- ======================================================= -->
+  <xacro:property name="PI" value="3.1415926535897931" />
+  
+  <!-- Base Chassis -->
+  <xacro:property name="base_radius" value="0.15" />
+  <xacro:property name="base_height" value="0.05" />
+  <xacro:property name="base_mass"   value="2.5" />
+
+  <!-- Omni Wheels -->
+  <xacro:property name="wheel_radius" value="0.05" />
+  <xacro:property name="wheel_width"  value="0.03" />
+  <xacro:property name="wheel_mass"   value="0.2" />
+  
+  <!-- Distance from the center of the base to the wheel center -->
+  <xacro:property name="wheel_offset" value="0.17" /> 
+
+  <!-- ======================================================= -->
+  <!-- MATERIALS (For RViz)                                    -->
+  <!-- ======================================================= -->
+  <material name="blue">
+    <color rgba="0.1 0.3 0.8 1.0"/>
+  </material>
+  
+  <material name="dark_grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+
+  <!-- ======================================================= -->
+  <!-- BASE CHASSIS                                            -->
+  <!-- ======================================================= -->
+  <link name="base_footprint" />
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <!-- Elevate the chassis so the wheels touch the ground -->
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${base_radius}" length="${base_height}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${base_radius}" length="${base_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${base_mass}"/>
+      <inertia ixx="${(1/12) * base_mass * (3*base_radius*base_radius + base_height*base_height)}" ixy="0.0" ixz="0.0"
+               iyy="${(1/12) * base_mass * (3*base_radius*base_radius + base_height*base_height)}" iyz="0.0"
+               izz="${(1/2) * base_mass * base_radius*base_radius}" />
+    </inertial>
+  </link>
+
+  <!-- Gazebo color for the base -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!-- ======================================================= -->
+  <!-- OMNI WHEEL MACRO                                        -->
+  <!-- ======================================================= -->
+  <xacro:macro name="omni_wheel" params="prefix angle">
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="dark_grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="${(1/12) * wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)}" ixy="0.0" ixz="0.0"
+                 iyy="${(1/12) * wheel_mass * (3*wheel_radius*wheel_radius + wheel_width*wheel_width)}" iyz="0.0"
+                 izz="${(1/2) * wheel_mass * wheel_radius*wheel_radius}" />
+      </inertial>
+    </link>
+
+    <!-- Pitch the wheel 90 degrees (PI/2) to orient the axle radially -->
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="${wheel_offset * cos(angle)} ${wheel_offset * sin(angle)} 0" 
+              rpy="0 ${PI/2} ${angle}"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+
+    <!-- Gazebo Physics & Friction Properties -->
+    <gazebo reference="${prefix}_wheel">
+      <mu1>1.0</mu1>
+      <mu2>0.0</mu2>
+      <fdir1>1 0 0</fdir1>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>1.0</maxVel>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ======================================================= -->
+  <!-- WHEEL INSTANTIATIONS (120 Degrees apart)                -->
+  <!-- ======================================================= -->
+  
+  <!-- Front Left Wheel: 60 degrees (PI/3) -->
+  <xacro:omni_wheel prefix="front_left" angle="${PI/3}" />
+  
+  <!-- Back Wheel: 180 degrees (PI) -->
+  <xacro:omni_wheel prefix="back" angle="${PI}" />
+  
+  <!-- Front Right Wheel: -60 degrees (-PI/3) -->
+  <xacro:omni_wheel prefix="front_right" angle="${-PI/3}" />
 
 </robot>
