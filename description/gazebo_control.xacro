@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- ROS 2 Planar Move Plugin for Omni-directional Control -->
+  <gazebo>
+    <plugin name="gazebo_ros_planar_move" filename="libgazebo_ros_planar_move.so">
+      <ros>
+        <namespace>/</namespace>
+        <remapping>cmd_vel:=cmd_vel</remapping>
+        <remapping>odom:=odom</remapping>
+      </ros>
+      
+      <!-- Plugin Settings -->
+      <update_rate>100</update_rate>
+      <publish_rate>50</publish_rate>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      
+      <!-- Frames -->
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      
+      <!-- Covariance -->
+      <covariance_x>0.0001</covariance_x>
+      <covariance_y>0.0001</covariance_y>
+      <covariance_yaw>0.01</covariance_yaw>
+    </plugin>
+  </gazebo>
+</robot>
